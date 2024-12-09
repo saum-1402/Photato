@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "538370776040",
+    "project_id": "nutrify-abea7",
+    "storage_bucket": "nutrify-abea7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:538370776040:android:95d5ae2965489176fca25d",
+        "android_client_info": {
+          "package_name": "com.saumil.nutrify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "538370776040-j248r2i1rbm65angh1hh24ujb1p3n8mc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.saumil.nutrify",
+            "certificate_hash": "0317c417e5899a001c2d010962ac6e5e99b8249f"
+          }
+        },
+        {
+          "client_id": "538370776040-u5h2tu4d1g3j1ovkmc4vh0mc2mtg54qn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNSYZAVeCKFPRs9N2zIrygJ1UjzlPLkHY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "538370776040-u5h2tu4d1g3j1ovkmc4vh0mc2mtg54qn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
