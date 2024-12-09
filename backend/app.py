@@ -35,6 +35,14 @@ model_mobilenet.eval()
 class_names_mobilenet = checkpoint_mobilenet['classes']  # Retrieve the class names\
 #--------------------mobilenet---------------------
 
+#--------------------efficientnet---------------------
+checkpoint_efficientnet = torch.load("model/efficientnet/best_model.pth", map_location=device,weights_only=False)
+model_efficientnet = checkpoint_efficientnet['model']
+model_efficientnet = model.to(device)
+model_efficientnet.eval()
+class_names_efficientnet = checkpoint_efficientnet['classes']  # Retrieve the class names
+#--------------------efficientnet---------------------
+
 
 # Define the inference function
 def mobile_net_inference(image_path):
@@ -98,6 +106,32 @@ def resnet_inference(image_path):
     return class_names[predicted_class_idx.item()]
 
 
+def efficientnet_inference(image_path):
+    # Preprocess the input image
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+    image = Image.open(image_path).convert("RGB")
+    input_tensor = transform(image).unsqueeze(0).to(device)
+
+    # Perform prediction
+    with torch.no_grad():
+        outputs = model_efficientnet(input_tensor)
+
+        # Check if outputs are structured differently (e.g., an output object with logits)
+        if hasattr(outputs, 'logits'):  # Check if the model returns an object with 'logits'
+            outputs = outputs.logits
+
+        # Apply max to get the predicted class index
+        _, predicted_class_idx = torch.max(outputs, 1)
+
+    # Map the predicted index to the class name
+    return class_names_efficientnet[predicted_class_idx.item()]
+    
+
+
 @app.route('/predict-image', methods=['POST'])
 def predict_image():
     """Handle image prediction requests."""
@@ -134,6 +168,13 @@ def predict_image():
             image = request.files['image_mobilenet']
             # Perform inference directly on the uploaded file
             prediction = mobile_net_inference(image)
+            return jsonify({'prediction': prediction})
+    
+        if('image_efficientnet' in request.files.keys()):
+            # print("image_efficientnet")
+            image = request.files['image_efficientnet']
+            # Perform inference directly on the uploaded file
+            prediction = efficientnet_inference(image)
             return jsonify({'prediction': prediction})
         
     # print("hello1")

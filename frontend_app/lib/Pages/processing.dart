@@ -42,10 +42,10 @@ class ProcessingPage extends StatefulWidget {
 class _ProcessingPageState extends State<ProcessingPage> {
   String? _responseMessage;
   bool _loading = false;
-  String _selectedModel = 'SwinTiny'; // Default model selection
+  String _selectedModel = 'SwinTiny (Accuracy: 85.91)'; // Default model selection
 
   // List of models to choose from, including the new model
-  final List<String> _models = ['SwinTiny', 'Gemini', 'Resnet', 'MobileNet'];
+  final List<String> _models = ['SwinTiny (Accuracy: 85.91)', 'Resnet (Accuracy: 76.45)', 'MobileNet v2 (Accuracy: 73.03)', 'EfficientNet b3 (Accuracy: 81.25)', 'Gemini 1.5 Flash'];
 
   @override
   Widget build(BuildContext context) {
@@ -100,10 +100,11 @@ class _ProcessingPageState extends State<ProcessingPage> {
   Future<void> _processAndSendToModel() async {
     setState(() {
       _loading = true;
+      _responseMessage = null;
     });
 
     try {
-      if (_selectedModel == 'Gemini') {
+      if (_selectedModel == 'Gemini 1.5 Flash') {
         // Use Gemini model
         const apiKey = 'AIzaSyAxqba8vgvihZsqxTyYSpbRb926fm_qguI'; // Replace with your actual API key
         final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
@@ -118,11 +119,11 @@ class _ProcessingPageState extends State<ProcessingPage> {
         // Generate the response
         final response = await model.generateContent([Content.multi([prompt, imagePart])]);
         setState(() {
-          _responseMessage = response.text ?? 'No response from Gemini';
+          _responseMessage = 'Model: $_selectedModel\nPrediction: ${response.text ?? 'No response from Gemini'}';
           _loading = false;
         });
       }
-      if(_selectedModel == 'SwinTiny') {
+      if(_selectedModel == 'SwinTiny (Accuracy: 85.91)') {
         // Use the same logic for SwinTiny and NewModel
         final request = http.MultipartRequest(
           'POST',
@@ -149,7 +150,7 @@ class _ProcessingPageState extends State<ProcessingPage> {
         if (response.statusCode == 200) {
           final responseData = jsonDecode(responseBody);
           setState(() {
-            _responseMessage = responseData['prediction'] ?? 'No prediction';
+            _responseMessage = 'Model: $_selectedModel\nPrediction: ${responseData['prediction'] ?? 'No prediction'}';
             _loading = false;
           });
         } else {
@@ -159,7 +160,7 @@ class _ProcessingPageState extends State<ProcessingPage> {
           });
         }
       }
-      if(_selectedModel == 'Resnet') {
+      if(_selectedModel == 'Resnet (Accuracy: 76.45)') {
         final request = http.MultipartRequest(
           'POST',
           Uri.parse(flaskServerUrl), // Use the Flask server URL defined above
@@ -185,7 +186,7 @@ class _ProcessingPageState extends State<ProcessingPage> {
         if (response.statusCode == 200) {
           final responseData = jsonDecode(responseBody);
           setState(() {
-            _responseMessage = responseData['prediction'] ?? 'No prediction';
+            _responseMessage = 'Model: $_selectedModel\nPrediction: ${responseData['prediction'] ?? 'No prediction'}';
             _loading = false;
           });
         } else {
@@ -195,7 +196,7 @@ class _ProcessingPageState extends State<ProcessingPage> {
           });
         }
       }
-      if(_selectedModel == 'MobileNet') {
+      if(_selectedModel == 'MobileNet v2 (Accuracy: 73.03)') {
         final request = http.MultipartRequest(
           'POST',
           Uri.parse(flaskServerUrl), // Use the Flask server URL defined above
@@ -221,7 +222,43 @@ class _ProcessingPageState extends State<ProcessingPage> {
         if (response.statusCode == 200) {
           final responseData = jsonDecode(responseBody);
           setState(() {
-            _responseMessage = responseData['prediction'] ?? 'No prediction';
+            _responseMessage = 'Model: $_selectedModel\nPrediction: ${responseData['prediction'] ?? 'No prediction'}';
+            _loading = false;
+          });
+        } else {
+          setState(() {
+            _responseMessage = 'Failed to process image: ${response.statusCode}';
+            _loading = false;
+          });
+        }
+      }
+      if(_selectedModel == 'EfficientNet b3 (Accuracy: 81.25)') {
+        final request = http.MultipartRequest(
+          'POST',
+          Uri.parse(flaskServerUrl), // Use the Flask server URL defined above
+        );
+        print(request);
+        // Add the image as a multipart file
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'image_efficientnet', // Field name for the image
+            await File(widget.picture.path).readAsBytes(),
+            filename: '${widget.picture.name}',
+            contentType: MediaType('image', 'jpeg'), // Content type
+          ),
+        );
+
+        // Add the selected model as a field in the request
+        request.fields['model'] = _selectedModel; // The selected model from the dropdown
+
+        // Send the request and wait for the response
+        final response = await request.send();
+        final responseBody = await response.stream.bytesToString();
+
+        if (response.statusCode == 200) {
+          final responseData = jsonDecode(responseBody);
+          setState(() {
+            _responseMessage = 'Model: $_selectedModel\nPrediction: ${responseData['prediction'] ?? 'No prediction'}';
             _loading = false;
           });
         } else {
